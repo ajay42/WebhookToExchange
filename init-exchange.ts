@@ -3,31 +3,20 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-// ccxt = require('ccxt')
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>live exchange<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //..............................................................................
-//
+// using environment variables
 
 export const exchangeBinance = new ccxt.binanceusdm({
-  apiKey: process.env.APP_BINANCE_API_KEY,
-  secret: process.env.APP_BINANCE_SECRET,
+  apiKey: process.env.APP_EXCHANGE_API_KEY,
+  secret: process.env.APP_EXCHANGE_SECRET,
   enableRateLimit: true,
 });
 
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>testnet<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //..............................................................................
+// simpler way
 
 // export const exchangeBinance = new ccxt.binanceusdm({
-//   apiKey: config.apikey,
-//   secret: config.secret,
+//   apiKey: your-api-key-here,
+//   secret: your-api-secret-here,
 //   enableRateLimit: true,
-//   //type: 'future',
-//   //testnet:true
 // });
-
-// (exchangeBinance as any).setSandboxMode(true);
-
-// export const publicBinance = new ccxt.binanceusdm();
-
-// (publicBinance as any).setSandboxMode(true);  // this probably not required

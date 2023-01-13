@@ -18,9 +18,6 @@ const server = app.listen(config.serverPort, "0.0.0.0", function () {
 //     .split(",")[0]
 //     .trim();
 //   // console.log("Incoming from:", ip);
-//   console.log(
-//     ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>new request<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-//   );
 
 //   // check for whitelisted IP
 //   if (!config.whitelist.includes(ip)) {
@@ -33,18 +30,14 @@ const server = app.listen(config.serverPort, "0.0.0.0", function () {
 //   }
 // });
 
-// Use json body parser
-// app.use(express.json());
 app.use(bodyParser.json());
 
 app.get("/", (req, res, next) => {
   res.send("Hello, world! All works!");
 });
 
-// Webhook should be received as POST
-app.post("/tradingview-listener/:webhook_key", async function (req, res) {
-  //:webhook_key is any random string, set as enviornment variable, same as
-  const webhookKey = process.env.APP_TRADINGVIEW_WEBHOOK_KEY;
+app.post("/tv-to-exchange/:webhook_key", async function (req, res) {
+  const webhookKey = process.env.APP_TV_WEBHOOK_KEY;
   if (!webhookKey) {
     res.send("Webhook key is blank!");
     return;
@@ -58,9 +51,8 @@ app.post("/tradingview-listener/:webhook_key", async function (req, res) {
 
   // get request body
   const webhook_data = req.body;
-  // console.log("Webhook received", webhook_data, Date());
 
-  const order_symbol = String(webhook_data.order_symbol).replace("PERP", "");
+  const order_symbol = String(webhook_data.order_symbol).replace("PERP", ""); //for Binance USDM Futures
   const order_side = webhook_data.order_side;
   const order_qty = webhook_data.order_qty;
   const order_price = webhook_data.order_price;
@@ -68,8 +60,7 @@ app.post("/tradingview-listener/:webhook_key", async function (req, res) {
 
   let responses: any;
 
-  //'flat position_side is essentially closing last open position
-  //manually close any dust position on the exchange
+  //flat position_side is essentially closing last open position in TV
 
   if (position_direction === "flat") {
     switch (order_side) {
@@ -105,9 +96,6 @@ const executeStrategy = async (
   order_price: number,
   position_direction: string
 ) => {
-  // to convert the incoming strings" symbol, direction, side from the TV format to Binance format
-  // const [asset, quote] = order_symbol.split("/");
-
   try {
     console.log(">>new request<<");
     console.log(
@@ -123,26 +111,11 @@ const executeStrategy = async (
         positionSide: position_direction,
       }
     );
-    // if (!order) {
-    //   throw new Error(exchangeBinance.id + " error passing order");
-    // }
 
-    console.log("exchnage response: ", order);
+    // console.log("exchange response: ", order);
     return order.status;
-    // return {
-    //   position_direction,
-    //   order_qty,
-    //   order_side,
-    //   order_symbol,
-    // };
   } catch (error) {
-    console.log("the caught error at executeStretegy method :\n", error);
-    // console.error(
-    //   //"useUnknownInCatchVariables": false to avoid error: Unknown type
-    //   exchangeBinance.id,
-    //   error.constructor.name,
-    //   error.message //.split("\n")[0].slice(0, 100)
-    // );
+    console.log("error @ executeStretegy :\n", error);
   }
 };
 
@@ -154,12 +127,6 @@ const clearPosition = async (
   order_price: number,
   position_side: string
 ) => {
-  // const positions_detail = await exchangeBinance.fetchBalance();
-  // console.log(
-  //   "fetchBalance returems: ",
-  //   JSON.stringify(positions_detail, undefined, 2)
-  // );
-
   try {
     let arr_symbol: string[] = [order_symbol];
     const symbol_pos = await exchangeBinance.fetchPositionsRisk(arr_symbol, {
@@ -179,18 +146,17 @@ const clearPosition = async (
         position_side
       );
 
-      // let o_side: "buy" | "sell" = "sell";
-      // if (position_side === "SHORT") o_side = "buy";
-
-      await exchangeBinance.createMarketOrder(
+      const order_close = await exchangeBinance.createMarketOrder(
         order_symbol,
         order_side,
         _qty,
         order_price,
         { positionSide: position_side }
       );
+      // console.log("exchange response: ", order_close);
+      return order_close.status;
     }
   } catch (error) {
-    console.log("caught error @ closePosition method :\n", error);
+    console.log("error @ closePosition :\n", error);
   }
 };
