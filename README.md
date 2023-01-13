@@ -1,4 +1,4 @@
-# tvWebhookToExchange
+# WebhookToExchange
 
 forwards webhook to crypto exchange using express and ccxt
 
@@ -29,15 +29,17 @@ How to run:
 "order_direction": "{{strategy.market_position}}"
 }
 
-
 ```
-
+```
 Points to note:
 
-1. uses market order only for simplicity and reliability
-2. ticker name is formatted as required by the exchange, currently set for Binance USDM Futures
-3. whole position is closed when order_direction is 'flat' in webhook signal
+1. code is currently set up for Binance USDM exchange
+2. uses market order only for simplicity and reliability
+3. ticker name is formatted as required by the exchange
+4. whole position is closed when order_direction is 'flat' in webhook signal
+5. init-exchange.ts and ticker formatting in app.ts can be modified to work with any other exchange
 
+```
 ```
 Options of basic security:
 
