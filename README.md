@@ -17,7 +17,7 @@ How to run:
 3. set preferred port (or use standard 8000)
 
 4. deploy app server and get a link to forward webhook to
-   send webhook to: your-link//tv-to-exchange/:webhook_key
+   send webhook to: your-link/tv-to-exchange/:webhook_key
 
 5. in TradingView, use webhook format:
 
